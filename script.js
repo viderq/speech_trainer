@@ -89,9 +89,9 @@ function renderSpeakers() {
             await renderRecordings(s.id);
             showScreen('recordingsScreen');
             headerTitle.textContent = s.name;
-            document.getElementById('recordingsTitleText').textContent = 'Записи ' + s.name;
+            document.getElementById('recordingsTitleText').textContent = '' + s.name;
             document.getElementById('menuRecordings').style.display = 'flex';
-            document.getElementById('menuRecordingsText').textContent = 'Записи (' + s.name + ')';
+            document.getElementById('menuRecordingsText').textContent = '(' + s.name + ')';
         };
         speakersList.appendChild(card);
     });
