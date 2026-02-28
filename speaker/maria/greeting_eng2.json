@@ -1,0 +1,19 @@
+[
+  { "start": 1, "end": 2, "text": "Ladies and gentleman" },
+  { "start": 2, "end": 3, "text": "My name is Mariia" },
+  { "start": 4, "end": 5, "text": "and I am the Chief Flight Attendant" },
+  { "start": 6, "end": 8, "text": "On behalf of Aeroflot – Russian Airlines" },
+  { "start": 8, "end": 12, "text": "we welcome you aboard this Airbus A320 aircraft" },
+  { "start": 11, "end": 13, "text": "named in honour" },
+  { "start": 14, "end": 14, "text": "of prominent scientist" },
+  { "start": 15, "end": 16, "text": "Dmitry Likhachev." },
+  { "start": 18, "end": 21, "text": "Your safety and comfort are the main priorities of our airline" },
+  { "start": 21, "end": 22, "text": "We are always at your service" },
+  { "start": 23, "end": 23, "text": "and do our best" },
+  { "start": 25, "end": 26, "text": "To make your flight pleasant." },
+  { "start": 27, "end": 28, "text": "Dear members of the elite levels" },
+  { "start": 29, "end": 31, "text": "of Aeroflot Bonus programme" },
+  { "start": 32, "end": 34, "text": "we thank you for being regular customers" },
+  { "start": 34, "end": 36, "text": "of Aeroflot Group airlines." },
+  { "start": 37, "end": 38, "text": "Thank you." }
+]

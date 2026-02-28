@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>бортречь • тренажёр</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <!-- Шрифт Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-gradient"></div>
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <button class="header-btn" id="backBtn" style="visibility: hidden;">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="header-title" id="headerTitle">бортречь</div>
+            <button class="header-btn" id="menuBtn">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+        </div>
+
+        <div class="menu-popup" id="menuPopup">
+            <div class="menu-item" id="menuSpeakers">
+                <i class="fas fa-users"></i> Спикеры
+            </div>
+            <div class="menu-item" id="menuRecordings" style="display: none;">
+                <i class="fas fa-list"></i> <span id="menuRecordingsText">Записи</span>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 1: СПИКЕРЫ -->
+        <div id="speakersScreen" class="screen active">
+            <h1 class="list-title">Спикеры</h1>
+            <div class="grid-list" id="speakersList"></div>
+        </div>
+
+        <!-- ЭКРАН 2: ЗАПИСИ -->
+        <div id="recordingsScreen" class="screen">
+            <h1 class="list-title" id="recordingsTitleText">Записи</h1>
+            <div class="grid-list" id="recordingsList"></div>
+        </div>
+
+        <!-- ЭКРАН 3: ПЛЕЕР -->
+        <div id="playerScreen" class="screen">
+            <div class="lyrics-container" id="lyricsContainer">
+                <!-- Фразы будут здесь -->
+            </div>
+
+            <div class="player-controls">
+                <div class="progress-section">
+                    <div class="progress-bar-container" id="progressBar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-info">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+                </div>
+                <div class="main-controls">
+                    <button class="control-btn btn-prev" id="prevBtn"><i class="fas fa-backward"></i></button>
+                    <button class="control-btn btn-play-pause" id="playPauseBtn"><i class="fas fa-play"></i></button>
+                    <button class="control-btn btn-next" id="nextBtn"><i class="fas fa-forward"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
