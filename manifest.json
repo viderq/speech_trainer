@@ -1,6 +1,6 @@
 {
-  "name": "Бортречь",
-  "short_name": "Бортречь",
+  "name": "Информания",
+  "short_name": "Информания",
   "description": "Тренажер для бортпроводников в стиле Apple Music",
   "start_url": "index.html",
   "display": "standalone",
