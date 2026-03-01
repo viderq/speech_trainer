@@ -111,8 +111,25 @@ passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
 });
 
+// Останавливаем аудио при уходе со страницы/сворачивании
+window.addEventListener('pagehide', () => {
+    if (typeof stopPlayback === 'function') stopPlayback();
+});
+
+window.addEventListener('visibilitychange', () => {
+    if (document.hidden && typeof stopPlayback === 'function') {
+        stopPlayback();
+    }
+});
+
 // ---------- НАВИГАЦИЯ ----------
 function showScreen(screenId) {
+    // Если уходим с экрана плеера, останавливаем музыку
+    const isLeavingPlayer = document.getElementById('playerScreen').classList.contains('active') && screenId !== 'playerScreen';
+    if (isLeavingPlayer) {
+        stopPlayback();
+    }
+
     screens.forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
     
