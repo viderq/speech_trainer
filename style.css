@@ -1,6 +1,6 @@
 :root {
-    --bg-color: #000;
-    --accent-color: #ff2d55; /* Розовый Apple Music */
+    --bg-color: #1a2d4b; /* Более светлый синий (как на небе в макете) */
+    --accent-color: #38bdf8; /* Светло-голубой акцент */
     --text-active: #fff;
     --text-inactive: rgba(255, 255, 255, 0.4);
     --safe-area-inset-top: env(safe-area-inset-top, 0px);
@@ -14,26 +14,32 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1a2d4b; /* Соответствует началу градиента в шапке */
+}
+
 body {
-    background-color: #000; /* Базовый черный для предотвращения вспышек при загрузке */
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--text-active);
-    height: 100vh;
     overflow: hidden;
     display: flex;
     justify-content: center;
 }
 
-/* Динамический фон в стиле Apple Music */
+/* Динамический фон в стиле Apple Music (яркий синий/морской) */
 .background-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -2; /* Уменьшаем z-index, чтобы не перекрывать размытие панелей */
+    z-index: -2;
     overflow: hidden;
-    background: #000;
+    background: #1a2d4b;
 }
 
 .bg-gradient {
@@ -43,12 +49,12 @@ body {
     top: -25%;
     left: -25%;
     background: 
-        radial-gradient(circle at 20% 30%, #4a1d3a 0%, transparent 40%),
-        radial-gradient(circle at 80% 20%, #1d2b4a 0%, transparent 40%),
-        radial-gradient(circle at 50% 80%, #1d4a32 0%, transparent 40%),
-        radial-gradient(circle at 70% 60%, #4a3e1d 0%, transparent 40%);
+        radial-gradient(circle at 20% 30%, #3b82f6 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, #0ea5e9 0%, transparent 60%),
+        radial-gradient(circle at 50% 80%, #1e40af 0%, transparent 60%),
+        radial-gradient(circle at 70% 60%, #06b6d4 0%, transparent 60%);
     filter: blur(80px);
-    animation: bg-rotate 30s infinite alternate;
+    animation: bg-rotate 20s infinite alternate linear;
 }
 
 @keyframes bg-rotate {
@@ -86,7 +92,7 @@ body {
 }
 
 .header-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border: none;
     width: 36px;
     height: 36px;
@@ -154,7 +160,7 @@ body {
 }
 
 .card-item {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 16px;
     display: flex;
@@ -166,18 +172,18 @@ body {
 }
 
 .card-item:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .card-item:active {
     transform: scale(0.97);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .card-icon {
     width: 56px;
     height: 56px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -299,7 +305,7 @@ body {
 .progress-bar-container {
     width: 100%;
     height: 4px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
     margin-bottom: 8px;
     position: relative;
@@ -308,7 +314,7 @@ body {
 
 .progress-bar-fill {
     height: 100%;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 2px;
     width: 0%;
 }
@@ -358,7 +364,7 @@ body {
     position: absolute;
     top: 70px;
     right: 24px;
-    background: rgba(40, 40, 40, 0.9);
+    background: rgba(25, 25, 25, 0.8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 14px;
@@ -366,7 +372,7 @@ body {
     min-width: 200px;
     z-index: 100;
     display: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
 
 .menu-popup.show {
@@ -382,10 +388,11 @@ body {
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
+    color: #fff;
 }
 
 .menu-item:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .menu-item i {

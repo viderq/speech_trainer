@@ -159,14 +159,43 @@ async function loadPlayer(recording) {
         const div = document.createElement('div');
         div.className = 'phrase-item';
         div.textContent = p.text;
-        div.onclick = () => seekTo(p.start);
+        div.onclick = () => playPhrase(p.start, p.end);
         lyricsContainer.appendChild(div);
     });
     
     lyricsContainer.scrollTop = 0;
 }
 
+function playPhrase(startTime, endTime) {
+    if (!currentRecording) return;
+    
+    // Удаляем предыдущие обработчики окончания фразы
+    if (audio._phraseEndHandler) {
+        audio.removeEventListener('timeupdate', audio._phraseEndHandler);
+    }
+
+    // Перематываем на начало фразы
+    seekTo(startTime);
+    
+    // Создаем новый обработчик для остановки в конце фразы
+    const checkEnd = () => {
+        if (audio.currentTime >= endTime) {
+            stopPlayback();
+            audio.removeEventListener('timeupdate', checkEnd);
+            audio._phraseEndHandler = null;
+        }
+    };
+    
+    audio._phraseEndHandler = checkEnd;
+    audio.addEventListener('timeupdate', checkEnd);
+}
+
 function togglePlayback() {
+    // При ручном запуске/паузе сбрасываем ограничение фразы
+    if (audio._phraseEndHandler) {
+        audio.removeEventListener('timeupdate', audio._phraseEndHandler);
+        audio._phraseEndHandler = null;
+    }
     if (isPlaying) stopPlayback();
     else startPlayback();
 }
@@ -280,10 +309,27 @@ function updateLyrics() {
 
 playPauseBtn.onclick = togglePlayback;
 
-document.getElementById('prevBtn').onclick = () => seekTo(Math.max(0, currentTime - 5));
-document.getElementById('nextBtn').onclick = () => seekTo(Math.min(currentRecording.duration, currentTime + 5));
+document.getElementById('prevBtn').onclick = () => {
+    if (audio._phraseEndHandler) {
+        audio.removeEventListener('timeupdate', audio._phraseEndHandler);
+        audio._phraseEndHandler = null;
+    }
+    seekTo(Math.max(0, currentTime - 5));
+};
+
+document.getElementById('nextBtn').onclick = () => {
+    if (audio._phraseEndHandler) {
+        audio.removeEventListener('timeupdate', audio._phraseEndHandler);
+        audio._phraseEndHandler = null;
+    }
+    seekTo(Math.min(currentRecording.duration, currentTime + 5));
+};
 
 document.getElementById('progressBar').onclick = (e) => {
+    if (audio._phraseEndHandler) {
+        audio.removeEventListener('timeupdate', audio._phraseEndHandler);
+        audio._phraseEndHandler = null;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
