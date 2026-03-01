@@ -18,7 +18,7 @@
         <div class="bg-gradient"></div>
     </div>
 
-    <div class="app-container">
+    <div class="app-container" id="appContainer" style="display: none;">
         <div class="header">
             <button class="header-btn" id="backBtn" style="visibility: hidden;">
                 <i class="fas fa-chevron-left"></i>
@@ -35,6 +35,9 @@
             </div>
             <div class="menu-item" id="menuRecordings" style="display: none;">
                 <i class="fas fa-list"></i> <span id="menuRecordingsText">Записи</span>
+            </div>
+            <div class="menu-item" id="menuLogout">
+                <i class="fas fa-sign-out-alt"></i> Выйти
             </div>
         </div>
 
@@ -74,6 +77,20 @@
             </div>
         </div>
     </div>
+
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <h1 class="login-title">бортречь</h1>
+            <p class="login-subtitle">Тренажёр для бортпроводников</p>
+            <div class="login-form">
+                <input type="text" id="loginInput" class="login-input" placeholder="Логин" autocomplete="username">
+                <input type="password" id="passwordInput" class="login-input" placeholder="Пароль" autocomplete="current-password">
+                <button id="loginBtn" class="login-btn">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">Ошибка входа</div>
 
     <script src="script.js"></script>
 </body>

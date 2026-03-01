@@ -34,6 +34,83 @@ const progressFill = document.getElementById('progressFill');
 const currentTimeSpan = document.getElementById('currentTime');
 const totalTimeSpan = document.getElementById('totalTime');
 
+// Элементы авторизации
+const loginScreen = document.getElementById('loginScreen');
+const appContainer = document.getElementById('appContainer');
+const loginInput = document.getElementById('loginInput');
+const passwordInput = document.getElementById('passwordInput');
+const loginBtn = document.getElementById('loginBtn');
+const notification = document.getElementById('notification');
+
+// ---------- АВТОРИЗАЦИЯ ----------
+function showNotification(text) {
+    notification.textContent = text;
+    notification.classList.add('show');
+    setTimeout(() => notification.classList.remove('show'), 3000);
+}
+
+async function handleLogin() {
+    const login = loginInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!login || !password) {
+        showNotification('Введите логин и пароль');
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Вход...';
+
+    try {
+        const response = await fetch('https://www.cocsr.na4u.ru/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ login, password })
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (data && data.ok) {
+            // Успешный вход
+            localStorage.setItem('user_session', JSON.stringify(data));
+            checkAuth();
+        } else {
+            showNotification('Ошибка входа');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Ошибка сервера');
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Войти';
+    }
+}
+
+function checkAuth() {
+    const session = localStorage.getItem('user_session');
+    if (session) {
+        loginScreen.style.display = 'none';
+        appContainer.style.display = 'flex';
+        renderSpeakers(); // Инициализация основного контента
+    } else {
+        loginScreen.style.display = 'flex';
+        appContainer.style.display = 'none';
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('user_session');
+    checkAuth();
+}
+
+loginBtn.addEventListener('click', handleLogin);
+document.getElementById('menuLogout').addEventListener('click', handleLogout);
+
+// Позволяем входить по нажатию Enter
+passwordInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
+});
+
 // ---------- НАВИГАЦИЯ ----------
 function showScreen(screenId) {
     screens.forEach(s => s.classList.remove('active'));
@@ -42,8 +119,10 @@ function showScreen(screenId) {
     backBtn.style.visibility = (screenId === 'speakersScreen') ? 'hidden' : 'visible';
     
     if (screenId === 'speakersScreen') {
-        headerTitle.textContent = 'бортречь';
+        headerTitle.textContent = 'Бортречь';
         document.getElementById('menuRecordings').style.display = 'none';
+    } else if (screenId === 'recordingsScreen') {
+        headerTitle.textContent = 'Модули';
     }
     menuPopup.classList.remove('show');
 }
@@ -88,7 +167,6 @@ function renderSpeakers() {
             currentSpeakerId = s.id;
             await renderRecordings(s.id);
             showScreen('recordingsScreen');
-            headerTitle.textContent = s.name;
             document.getElementById('recordingsTitleText').textContent = '' + s.name;
             document.getElementById('menuRecordings').style.display = 'flex';
             document.getElementById('menuRecordingsText').textContent = '(' + s.name + ')';
@@ -121,7 +199,10 @@ async function renderRecordings(speakerId) {
             currentRecording = r;
             await loadPlayer(r);
             showScreen('playerScreen');
-            headerTitle.textContent = r.title;
+            
+            const speaker = speakers.find(s => s.id === currentSpeakerId);
+            const speakerName = speaker ? speaker.name : '';
+            headerTitle.textContent = speakerName + ' ' + r.title;
         };
         recordingsList.appendChild(card);
     }
@@ -337,4 +418,10 @@ document.getElementById('progressBar').onclick = (e) => {
 };
 
 // Инициализация
-renderSpeakers();
+checkAuth();
+
+// Если пользователь уже авторизован, принудительно вызываем renderSpeakers, 
+// так как checkAuth может сработать до того, как все DOM элементы будут готовы для рендеринга
+if (localStorage.getItem('user_session')) {
+    renderSpeakers();
+}
