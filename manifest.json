@@ -4,8 +4,8 @@
   "description": "Тренажер для бортпроводников в стиле Apple Music",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#1a2d4b",
+  "theme_color": "#1a2d4b",
   "icons": [
     {
       "src": "img/icon-192.png",
