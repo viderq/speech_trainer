@@ -136,10 +136,10 @@ function showScreen(screenId) {
     backBtn.style.visibility = (screenId === 'speakersScreen') ? 'hidden' : 'visible';
     
     if (screenId === 'speakersScreen') {
-        headerTitle.textContent = 'Бортречь';
+        headerTitle.textContent = 'Ифнормания';
         document.getElementById('menuRecordings').style.display = 'none';
     } else if (screenId === 'recordingsScreen') {
-        headerTitle.textContent = 'Модули';
+        headerTitle.textContent = 'Атлас голосов';
     }
     menuPopup.classList.remove('show');
 }
