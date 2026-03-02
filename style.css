@@ -516,3 +516,42 @@ body {
 .notification.show {
     transform: translateX(-50%) translateY(0);
 }
+
+/* СТИЛИ ДЛЯ ПОДСВЕТКИ СЛОВ И ТУЛТИПА */
+.transcription-word {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: help;
+    display: inline-block;
+}
+
+.tooltip-popup {
+    position: fixed;
+    background: rgba(60, 85, 130, 0.95); /* Еще светлее: было 45, 65, 100 */
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 18px; /* Увеличили радиус */
+    padding: 16px 24px; /* Увеличили padding */
+    z-index: 200;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+    color: #fff;
+    font-size: 24px; /* Увеличили шрифт */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Ярче граница */
+    transform: translateY(5px) scale(0.95);
+}
+
+.tooltip-popup.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tooltip-transcription {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-active); /* Цвет как у основного текста */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}

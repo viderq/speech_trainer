@@ -3,6 +3,16 @@ const speakers = [
     { id: 'maria', name: 'Мария', icon: 'fa-user-nurse' }
 ];
 
+const dictionary = {
+    'behalf': '[bɪ\'hɑ:f]',
+    'aeroflot': '[\'ɛərəuflɔːt]',
+    'aboard': '[ə\'bɔ:d]',
+    'honour': '[\'ɒnə]',
+    'priority': '[praɪ\'ɔrɪtɪs]',
+    'elite': '[eɪ\'liːt]',
+    'bonus': '[\'bəunəs\']'
+};
+
 const recordings = {
     maria: [
         { id: 'maria_eng1', title: 'Greeting (English 1)', duration: 38, phrases: [], file: 'speaker/maria/greeting_eng1.json', audio: 'speaker/maria/greeting_eng1.mp3' },
@@ -19,6 +29,7 @@ const audio = new Audio();
 let currentTime = 0;
 let isPlaying = false;
 let activePhraseIndex = -1;
+let activeTooltipWord = null;
 
 // DOM-элементы
 const backBtn = document.getElementById('backBtn');
@@ -33,6 +44,11 @@ const playPauseBtn = document.getElementById('playPauseBtn');
 const progressFill = document.getElementById('progressFill');
 const currentTimeSpan = document.getElementById('currentTime');
 const totalTimeSpan = document.getElementById('totalTime');
+
+// Создание тултипа для транскрипции
+const tooltip = document.createElement('div');
+tooltip.className = 'tooltip-popup';
+document.body.appendChild(tooltip);
 
 // Элементы авторизации
 const loginScreen = document.getElementById('loginScreen');
@@ -167,6 +183,63 @@ document.getElementById('menuRecordings').addEventListener('click', async () => 
     }
 });
 
+// ---------- ТРАНСКРИПЦИЯ ----------
+function updateTooltipPosition() {
+    if (!activeTooltipWord || !tooltip.classList.contains('show')) return;
+
+    const rect = activeTooltipWord.getBoundingClientRect();
+    const containerRect = lyricsContainer.getBoundingClientRect();
+
+    // Проверяем, не скрылось ли слово за границами контейнера
+    // Учитываем небольшой запас (padding)
+    const isVisible = (
+        rect.top >= containerRect.top &&
+        rect.bottom <= containerRect.bottom
+    );
+
+    if (!isVisible) {
+        hideTooltip();
+        return;
+    }
+
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    let top = rect.top - tooltipRect.height - 16;
+    if (top < 10) {
+        top = rect.bottom + 16;
+    }
+
+    const left = Math.max(10, Math.min(window.innerWidth - tooltipRect.width - 10, rect.left + (rect.width / 2) - (tooltipRect.width / 2)));
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+}
+
+const hideTooltip = () => {
+    tooltip.classList.remove('show');
+    activeTooltipWord = null;
+    document.removeEventListener('click', hideTooltip);
+};
+
+function showTranscription(event, word) {
+    const transcription = dictionary[word];
+    if (!transcription) return;
+
+    activeTooltipWord = event.target;
+    tooltip.innerHTML = `<div class="tooltip-transcription">${transcription}</div>`;
+    tooltip.classList.add('show');
+
+    updateTooltipPosition();
+
+    // Задержка, чтобы текущий клик не закрыл тултип сразу
+    setTimeout(() => {
+        document.addEventListener('click', hideTooltip);
+    }, 10);
+}
+
+// Привязываем обновление позиции к прокрутке контейнера
+lyricsContainer.addEventListener('scroll', updateTooltipPosition);
+
 // ---------- СПИКЕРЫ ----------
 function renderSpeakers() {
     speakersList.innerHTML = '';
@@ -256,7 +329,26 @@ async function loadPlayer(recording) {
     recording.phrases.forEach((p, idx) => {
         const div = document.createElement('div');
         div.className = 'phrase-item';
-        div.textContent = p.text;
+        
+        // Разбиваем текст на слова и оборачиваем нужные в span
+        const words = p.text.split(/(\s+)/);
+        words.forEach(word => {
+            const cleanWord = word.toLowerCase().replace(/[.,!?;:()]/g, '');
+            if (dictionary[cleanWord]) {
+                const span = document.createElement('span');
+                span.className = 'transcription-word';
+                span.textContent = word;
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    showTranscription(e, cleanWord);
+                };
+                div.appendChild(span);
+            } else {
+                const textNode = document.createTextNode(word);
+                div.appendChild(textNode);
+            }
+        });
+
         div.onclick = () => playPhrase(p.start, p.end);
         lyricsContainer.appendChild(div);
     });
