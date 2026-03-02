@@ -30,6 +30,7 @@ let currentTime = 0;
 let isPlaying = false;
 let activePhraseIndex = -1;
 let activeTooltipWord = null;
+let tooltipInitialY = 0;
 
 // DOM-элементы
 const backBtn = document.getElementById('backBtn');
@@ -191,10 +192,18 @@ function updateTooltipPosition() {
     const containerRect = lyricsContainer.getBoundingClientRect();
 
     // Проверяем, не скрылось ли слово за границами контейнера
-    // Учитываем небольшой запас (padding)
+    // Окно должно исчезать недоходя 5% расстояния до нижней границы
+    const bottomThreshold = containerRect.bottom - (containerRect.height * 0.05);
+
+    // Новое условие: если слово переместилось на 20% от начальной позиции
+    const moveThreshold = containerRect.height * 0.20;
+    const currentY = rect.top + rect.height / 2;
+    const movedDistance = Math.abs(currentY - tooltipInitialY);
+
     const isVisible = (
         rect.top >= containerRect.top &&
-        rect.bottom <= containerRect.bottom
+        rect.bottom <= bottomThreshold &&
+        movedDistance <= moveThreshold
     );
 
     if (!isVisible) {
@@ -226,6 +235,9 @@ function showTranscription(event, word) {
     if (!transcription) return;
 
     activeTooltipWord = event.target;
+    const rect = activeTooltipWord.getBoundingClientRect();
+    tooltipInitialY = rect.top + rect.height / 2;
+
     tooltip.innerHTML = `<div class="tooltip-transcription">${transcription}</div>`;
     tooltip.classList.add('show');
 

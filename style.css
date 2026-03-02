@@ -218,18 +218,18 @@ body {
 .lyrics-container {
     flex: 1;
     overflow-y: scroll;
-    padding: 200px 32px 400px; /* Увеличиваем нижний отступ, чтобы последняя фраза поднималась выше контролов */
+    padding: 150px 32px 400px; /* Уменьшили верхний отступ, чтобы текст был выше */
     scroll-behavior: smooth;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     /* Возвращаем маску снизу, так как плеер теперь снова перекрывает текст */
-    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 85%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 85%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 70%, transparent 85%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 70%, transparent 85%);
 }
 
 @media (min-width: 1024px) {
     .lyrics-container {
-        padding-top: 250px;
+        padding-top: 180px;
         padding-bottom: 350px;
     }
 }
