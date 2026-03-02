@@ -46,6 +46,11 @@ const progressFill = document.getElementById('progressFill');
 const currentTimeSpan = document.getElementById('currentTime');
 const totalTimeSpan = document.getElementById('totalTime');
 
+// Навигация сайдбара
+const navSpeakers = document.getElementById('navSpeakers');
+const navRecordings = document.getElementById('navRecordings');
+const exitBtn = document.getElementById('exitBtn');
+
 // Создание тултипа для транскрипции
 const tooltip = document.createElement('div');
 tooltip.className = 'tooltip-popup';
@@ -109,6 +114,8 @@ function checkAuth() {
         loginScreen.style.display = 'none';
         appContainer.style.display = 'flex';
         renderSpeakers(); // Инициализация основного контента
+        // Принудительно вызываем showScreen, чтобы на десктопе правильно сработала логика (скрытие "Атлас голосов" и т.д.)
+        showScreen('speakersScreen');
     } else {
         loginScreen.style.display = 'flex';
         appContainer.style.display = 'none';
@@ -122,6 +129,7 @@ function handleLogout() {
 
 loginBtn.addEventListener('click', handleLogin);
 document.getElementById('menuLogout').addEventListener('click', handleLogout);
+if (exitBtn) exitBtn.addEventListener('click', handleLogout);
 
 // Позволяем входить по нажатию Enter
 passwordInput.addEventListener('keypress', (e) => {
@@ -141,19 +149,56 @@ window.addEventListener('visibilitychange', () => {
 
 // ---------- НАВИГАЦИЯ ----------
 function showScreen(screenId) {
-    // Если уходим с экрана плеера, останавливаем музыку
-    const isLeavingPlayer = document.getElementById('playerScreen').classList.contains('active') && screenId !== 'playerScreen';
+    const isDesktop = window.innerWidth >= 800;
+
+    // Если уходим с экрана плеера на мобильном, останавливаем музыку
+    // На десктопе плеер всегда виден в правой части
+    const isLeavingPlayer = !isDesktop && document.getElementById('playerScreen').classList.contains('active') && screenId !== 'playerScreen';
     if (isLeavingPlayer) {
         stopPlayback();
     }
 
-    screens.forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    if (isDesktop) {
+        // На десктопе переключаем только экраны внутри сайдбара
+        if (screenId === 'speakersScreen' || screenId === 'recordingsScreen') {
+            document.getElementById('speakersScreen').classList.remove('active');
+            document.getElementById('recordingsScreen').classList.remove('active');
+            document.getElementById(screenId).classList.add('active');
+            
+            // Обновляем иконки навигации
+            navSpeakers.classList.toggle('active', screenId === 'speakersScreen');
+            navRecordings.classList.toggle('active', screenId === 'recordingsScreen');
+
+            // Скрываем "Атлас голосов", если в разделе "Спикер"
+            navRecordings.style.display = (screenId === 'speakersScreen') ? 'none' : 'flex';
+            
+            // Показываем кнопку "Выход" только в разделе "Спикер" на десктопе
+            // В других разделах на этом месте будет кнопка "Назад"
+            exitBtn.style.display = (screenId === 'speakersScreen') ? 'flex' : 'none';
+        }
+        // Если вызван playerScreen на десктопе, мы просто убеждаемся, что он активен (хотя CSS это и так делает)
+        if (screenId === 'playerScreen') {
+            document.getElementById('playerScreen').classList.add('active');
+        }
+    } else {
+        // Мобильная логика (как была)
+        screens.forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        // Убеждаемся, что на мобильном "Атлас голосов" виден (если он должен быть виден в хедере, хотя в хедере на мобильном его нет)
+        navRecordings.style.display = ''; 
+        // На мобильном кнопка Выход всегда скрыта
+        exitBtn.style.display = 'none';
+    }
     
-    backBtn.style.visibility = (screenId === 'speakersScreen') ? 'hidden' : 'visible';
+    backBtn.style.display = (screenId === 'speakersScreen' && isDesktop) ? 'none' : 'flex';
+    if (!isDesktop) {
+        backBtn.style.visibility = (screenId === 'speakersScreen') ? 'hidden' : 'visible';
+    } else {
+        backBtn.style.visibility = 'visible';
+    }
     
     if (screenId === 'speakersScreen') {
-        headerTitle.textContent = 'Ифнормания';
+        headerTitle.textContent = 'Информания';
         document.getElementById('menuRecordings').style.display = 'none';
     } else if (screenId === 'recordingsScreen') {
         headerTitle.textContent = 'Атлас голосов';
@@ -178,6 +223,14 @@ document.addEventListener('click', () => menuPopup.classList.remove('show'));
 
 document.getElementById('menuSpeakers').addEventListener('click', () => showScreen('speakersScreen'));
 document.getElementById('menuRecordings').addEventListener('click', async () => {
+    if (currentSpeakerId) {
+        await renderRecordings(currentSpeakerId);
+        showScreen('recordingsScreen');
+    }
+});
+
+navSpeakers.addEventListener('click', () => showScreen('speakersScreen'));
+navRecordings.addEventListener('click', async () => {
     if (currentSpeakerId) {
         await renderRecordings(currentSpeakerId);
         showScreen('recordingsScreen');
@@ -540,9 +593,3 @@ document.getElementById('progressBar').onclick = (e) => {
 
 // Инициализация
 checkAuth();
-
-// Если пользователь уже авторизован, принудительно вызываем renderSpeakers, 
-// так как checkAuth может сработать до того, как все DOM элементы будут готовы для рендеринга
-if (localStorage.getItem('user_session')) {
-    renderSpeakers();
-}

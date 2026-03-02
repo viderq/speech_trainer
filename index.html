@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
     <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.cocsr.na4u.ru; media-src 'self';">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a2d4b">
@@ -19,60 +20,79 @@
     </div>
 
     <div class="app-container" id="appContainer" style="display: none;">
-        <div class="header">
-            <button class="header-btn" id="backBtn" style="visibility: hidden;">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <div class="header-title" id="headerTitle">бортречь</div>
-            <button class="header-btn" id="menuBtn">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
-        </div>
-
-        <div class="menu-popup" id="menuPopup">
-            <div class="menu-item" id="menuSpeakers">
-                <i class="fas fa-users"></i> Спикеры
-            </div>
-            <div class="menu-item" id="menuRecordings" style="display: none;">
-                <i class="fas fa-list"></i> <span id="menuRecordingsText">Записи</span>
-            </div>
-            <div class="menu-item" id="menuLogout">
-                <i class="fas fa-sign-out-alt"></i> Выйти
-            </div>
-        </div>
-
-        <!-- ЭКРАН 1: СПИКЕРЫ -->
-        <div id="speakersScreen" class="screen active">
-            <h1 class="list-title">Спикеры</h1>
-            <div class="grid-list" id="speakersList"></div>
-        </div>
-
-        <!-- ЭКРАН 2: ЗАПИСИ -->
-        <div id="recordingsScreen" class="screen">
-            <h1 class="list-title" id="recordingsTitleText">Записи</h1>
-            <div class="grid-list" id="recordingsList"></div>
-        </div>
-
-        <!-- ЭКРАН 3: ПЛЕЕР -->
-        <div id="playerScreen" class="screen">
-            <div class="lyrics-container" id="lyricsContainer">
-                <!-- Фразы будут здесь -->
-            </div>
-
-            <div class="player-controls">
-                <div class="progress-section">
-                    <div class="progress-bar-container" id="progressBar">
-                        <div class="progress-bar-fill" id="progressFill"></div>
+        <!-- САЙДБАР (левая часть 1/4 на десктопе) -->
+        <div class="sidebar" id="sidebar">
+            <div class="header sidebar-header">
+                <button class="header-btn" id="backBtn" style="visibility: hidden;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="header-btn" id="exitBtn" title="Выход" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <div class="header-nav-icons" id="sidebarNav">
+                    <div class="nav-icon active" id="navSpeakers" title="Спикеры">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Спикер</span>
                     </div>
-                    <div class="time-info">
-                        <span id="currentTime">0:00</span>
-                        <span id="totalTime">0:00</span>
+                    <div class="nav-icon" id="navRecordings" title="Атлас голосов">
+                        <i class="fas fa-microphone-lines"></i>
+                        <span>Атлас голосов</span>
                     </div>
                 </div>
-                <div class="main-controls">
-                    <button class="control-btn btn-prev" id="prevBtn"><i class="fas fa-backward"></i></button>
-                    <button class="control-btn btn-play-pause" id="playPauseBtn"><i class="fas fa-play"></i></button>
-                    <button class="control-btn btn-next" id="nextBtn"><i class="fas fa-forward"></i></button>
+                <div class="header-title mobile-only" id="headerTitle">бортречь</div>
+                <button class="header-btn mobile-only" id="menuBtn">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+
+            <div class="menu-popup" id="menuPopup">
+                <div class="menu-item" id="menuSpeakers">
+                    <i class="fas fa-users"></i> Спикеры
+                </div>
+                <div class="menu-item" id="menuRecordings" style="display: none;">
+                    <i class="fas fa-list"></i> <span id="menuRecordingsText">Записи</span>
+                </div>
+                <div class="menu-item" id="menuLogout">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </div>
+            </div>
+
+            <!-- ЭКРАН 1: СПИКЕРЫ -->
+            <div id="speakersScreen" class="screen active">
+                <h1 class="list-title">Спикеры</h1>
+                <div class="grid-list" id="speakersList"></div>
+            </div>
+
+            <!-- ЭКРАН 2: ЗАПИСИ -->
+            <div id="recordingsScreen" class="screen">
+                <h1 class="list-title" id="recordingsTitleText">Записи</h1>
+                <div class="grid-list" id="recordingsList"></div>
+            </div>
+        </div>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ (правая часть 3/4 на десктопе) -->
+        <div class="main-content" id="mainContent">
+            <!-- ЭКРАН 3: ПЛЕЕР -->
+            <div id="playerScreen" class="screen">
+                <div class="lyrics-container" id="lyricsContainer">
+                    <!-- Фразы будут здесь -->
+                </div>
+
+                <div class="player-controls">
+                    <div class="progress-section">
+                        <div class="progress-bar-container" id="progressBar">
+                            <div class="progress-bar-fill" id="progressFill"></div>
+                        </div>
+                        <div class="time-info">
+                            <span id="currentTime">0:00</span>
+                            <span id="totalTime">0:00</span>
+                        </div>
+                    </div>
+                    <div class="main-controls">
+                        <button class="control-btn btn-prev" id="prevBtn"><i class="fas fa-backward"></i></button>
+                        <button class="control-btn btn-play-pause" id="playPauseBtn"><i class="fas fa-play"></i></button>
+                        <button class="control-btn btn-next" id="nextBtn"><i class="fas fa-forward"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
