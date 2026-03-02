@@ -71,6 +71,23 @@ body {
     position: relative;
     padding-top: var(--safe-area-inset-top);
     padding-bottom: var(--safe-area-inset-bottom);
+    overflow: hidden; /* Добавлено, чтобы предотвратить общий скролл страницы */
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 40;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 @media (min-width: 800px) {
@@ -88,12 +105,14 @@ body {
         flex-direction: column;
         position: relative;
         z-index: 40;
+        flex: none;
     }
 
     .main-content {
         width: 75%;
         height: 100vh; /* Занимаем всю высоту */
         position: relative;
+        flex: none;
     }
 
     #playerScreen.screen {
@@ -279,18 +298,18 @@ body {
 .lyrics-container {
     flex: 1;
     overflow-y: scroll;
-    padding: 150px 32px 400px; /* Уменьшили верхний отступ, чтобы текст был выше */
+    padding: 120px 32px 300px; /* Уменьшили отступы для мобильных */
     scroll-behavior: smooth;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     /* Возвращаем маску снизу, так как плеер теперь снова перекрывает текст */
-    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 70%, transparent 85%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 70%, transparent 85%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 85%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 85%);
 }
 
 @media (min-width: 800px) {
     .lyrics-container {
-        padding-top: 180px;
+        padding-top: 200px;
         padding-bottom: 350px;
     }
 }
