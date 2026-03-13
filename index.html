@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>бортречь • тренажёр</title>
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
-    <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://www.cocsr.na4u.ru; media-src 'self';">
     <link rel="stylesheet" href="style.css">
@@ -20,7 +18,6 @@
     </div>
 
     <div class="app-container" id="appContainer" style="display: none;">
-        <!-- САЙДБАР (левая часть 1/4 на десктопе) -->
         <div class="sidebar" id="sidebar">
             <div class="header sidebar-header">
                 <button class="header-btn" id="backBtn" style="visibility: hidden;">
@@ -57,25 +54,25 @@
                 </div>
             </div>
 
-            <!-- ЭКРАН 1: СПИКЕРЫ -->
+            <div id="introductionScreen" class="screen full-screen-intro">
+                <div class="intro-content">
+                    <img src="img/stewardess.png" alt="Stewardess" class="intro-img">
+                    <div id="introLyrics" class="intro-lyrics"></div>
+                    <button id="startMainBtn" class="login-btn" style="display: none; margin-top: 20px;">Начать обучение</button>
+                </div>
+            </div>
             <div id="speakersScreen" class="screen active">
                 <h1 class="list-title">Спикеры</h1>
                 <div class="grid-list" id="speakersList"></div>
             </div>
-
-            <!-- ЭКРАН 2: ЗАПИСИ -->
             <div id="recordingsScreen" class="screen">
                 <h1 class="list-title" id="recordingsTitleText">Записи</h1>
                 <div class="grid-list" id="recordingsList"></div>
             </div>
         </div>
-
-        <!-- ОСНОВНОЙ КОНТЕНТ (правая часть 3/4 на десктопе) -->
         <div class="main-content" id="mainContent">
-            <!-- ЭКРАН 3: ПЛЕЕР -->
             <div id="playerScreen" class="screen">
                 <div class="lyrics-container" id="lyricsContainer">
-                    <!-- Фразы будут здесь -->
                 </div>
 
                 <div class="player-controls">

@@ -1,4 +1,3 @@
-// ---------- ДАННЫЕ (из макета) ----------
 const speakers = [
     { id: 'maria', name: 'Мария', icon: 'fa-user-nurse' }
 ];
@@ -22,7 +21,6 @@ const recordings = {
     ]
 };
 
-// ---------- СОСТОЯНИЕ ----------
 let currentSpeakerId = null;
 let currentRecording = null;
 const audio = new Audio();
@@ -32,7 +30,6 @@ let activePhraseIndex = -1;
 let activeTooltipWord = null;
 let tooltipInitialY = 0;
 
-// DOM-элементы
 const backBtn = document.getElementById('backBtn');
 const menuBtn = document.getElementById('menuBtn');
 const menuPopup = document.getElementById('menuPopup');
@@ -46,17 +43,14 @@ const progressFill = document.getElementById('progressFill');
 const currentTimeSpan = document.getElementById('currentTime');
 const totalTimeSpan = document.getElementById('totalTime');
 
-// Навигация сайдбара
 const navSpeakers = document.getElementById('navSpeakers');
 const navRecordings = document.getElementById('navRecordings');
 const exitBtn = document.getElementById('exitBtn');
 
-// Создание тултипа для транскрипции
 const tooltip = document.createElement('div');
 tooltip.className = 'tooltip-popup';
 document.body.appendChild(tooltip);
 
-// Элементы авторизации
 const loginScreen = document.getElementById('loginScreen');
 const appContainer = document.getElementById('appContainer');
 const loginInput = document.getElementById('loginInput');
@@ -64,7 +58,6 @@ const passwordInput = document.getElementById('passwordInput');
 const loginBtn = document.getElementById('loginBtn');
 const notification = document.getElementById('notification');
 
-// ---------- АВТОРИЗАЦИЯ ----------
 function showNotification(text) {
     notification.textContent = text;
     notification.classList.add('show');
@@ -84,7 +77,7 @@ async function handleLogin() {
     loginBtn.textContent = 'Вход...';
 
     try {
-        const response = await fetch('https://www.cocsr.na4u.ru/login.php', {
+        const response = await fetch('login.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ login, password })
@@ -93,11 +86,10 @@ async function handleLogin() {
         const data = await response.json().catch(() => null);
 
         if (data && data.ok) {
-            // Успешный вход
             localStorage.setItem('user_session', JSON.stringify(data));
             checkAuth();
         } else {
-            showNotification('Ошибка входа');
+            showNotification(data ? data.message : 'Ошибка входа');
         }
     } catch (error) {
         console.error('Login error:', error);
@@ -108,17 +100,95 @@ async function handleLogin() {
     }
 }
 
-function checkAuth() {
+async function checkAuth() {
     const session = localStorage.getItem('user_session');
     if (session) {
-        loginScreen.style.display = 'none';
-        appContainer.style.display = 'flex';
-        renderSpeakers(); // Инициализация основного контента
-        // Принудительно вызываем showScreen, чтобы на десктопе правильно сработала логика (скрытие "Атлас голосов" и т.д.)
-        showScreen('speakersScreen');
+        try {
+            const checkResp = await fetch('verify_session.php');
+            const checkData = await checkResp.json();
+            
+            if (!checkData.ok) {
+                handleLogout();
+                return;
+            }
+
+            const userData = JSON.parse(session);
+            loginScreen.style.display = 'none';
+            appContainer.style.display = 'flex';
+            
+            if (userData.intro === false) {
+                showScreen('introductionScreen');
+                startIntroduction();
+            } else {
+                const introScreen = document.getElementById('introductionScreen');
+                if (introScreen) introScreen.classList.remove('active');
+                renderSpeakers();
+                showScreen('speakersScreen');
+            }
+        } catch (e) {
+            console.error('Auth verification error:', e);
+        }
     } else {
         loginScreen.style.display = 'flex';
         appContainer.style.display = 'none';
+    }
+}
+
+async function startIntroduction() {
+    const introAudio = new Audio('intro/intro_0.5.m4a');
+    const lyricsContainer = document.getElementById('introLyrics');
+    const startBtn = document.getElementById('startMainBtn');
+    
+    try {
+        const resp = await fetch('intro/intro_0.5.json');
+        const lyrics = await resp.json();
+        
+        lyricsContainer.innerHTML = '';
+        lyrics.forEach(text => {
+            const div = document.createElement('div');
+            div.className = 'intro-phrase';
+            div.textContent = text;
+            lyricsContainer.appendChild(div);
+        });
+
+        introAudio.play();
+        
+        const updateLyrics = () => {
+            const progress = introAudio.currentTime / introAudio.duration;
+            if (isNaN(progress)) return;
+
+            const scrollHeight = lyricsContainer.scrollHeight;
+            const clientHeight = lyricsContainer.clientHeight;
+            
+            const targetScroll = scrollHeight - 100; 
+            lyricsContainer.scrollTop = targetScroll * progress;
+            
+            const phrases = lyricsContainer.querySelectorAll('.intro-phrase');
+            const activeIndex = Math.floor(progress * phrases.length);
+            phrases.forEach((p, i) => {
+                p.classList.toggle('active', i === activeIndex);
+            });
+        };
+        
+        introAudio.ontimeupdate = updateLyrics;
+        introAudio.onended = () => {
+            startBtn.style.display = 'block';
+        };
+        
+        startBtn.onclick = async () => {
+            const resp = await fetch('update_intro.php', { method: 'POST' });
+            const data = await resp.json();
+            if (data.ok) {
+                const session = JSON.parse(localStorage.getItem('user_session'));
+                session.intro = true;
+                localStorage.setItem('user_session', JSON.stringify(session));
+                location.reload();
+            }
+        };
+        
+    } catch (e) {
+        console.error('Intro error', e);
+        startBtn.style.display = 'block';
     }
 }
 
@@ -131,12 +201,10 @@ loginBtn.addEventListener('click', handleLogin);
 document.getElementById('menuLogout').addEventListener('click', handleLogout);
 if (exitBtn) exitBtn.addEventListener('click', handleLogout);
 
-// Позволяем входить по нажатию Enter
 passwordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
 });
 
-// Останавливаем аудио при уходе со страницы/сворачивании
 window.addEventListener('pagehide', () => {
     if (typeof stopPlayback === 'function') stopPlayback();
 });
@@ -147,46 +215,36 @@ window.addEventListener('visibilitychange', () => {
     }
 });
 
-// ---------- НАВИГАЦИЯ ----------
 function showScreen(screenId) {
     const isDesktop = window.innerWidth >= 800;
 
-    // Если уходим с экрана плеера на мобильном, останавливаем музыку
-    // На десктопе плеер всегда виден в правой части
     const isLeavingPlayer = !isDesktop && document.getElementById('playerScreen').classList.contains('active') && screenId !== 'playerScreen';
     if (isLeavingPlayer) {
         stopPlayback();
     }
 
     if (isDesktop) {
-        // На десктопе переключаем только экраны внутри сайдбара
-        if (screenId === 'speakersScreen' || screenId === 'recordingsScreen') {
+        if (screenId === 'speakersScreen' || screenId === 'recordingsScreen' || screenId === 'introductionScreen') {
             document.getElementById('speakersScreen').classList.remove('active');
             document.getElementById('recordingsScreen').classList.remove('active');
+            if (document.getElementById('introductionScreen')) document.getElementById('introductionScreen').classList.remove('active');
+            
             document.getElementById(screenId).classList.add('active');
             
-            // Обновляем иконки навигации
             navSpeakers.classList.toggle('active', screenId === 'speakersScreen');
             navRecordings.classList.toggle('active', screenId === 'recordingsScreen');
 
-            // Скрываем "Атлас голосов", если в разделе "Спикер"
-            navRecordings.style.display = (screenId === 'speakersScreen') ? 'none' : 'flex';
+            navRecordings.style.display = (screenId === 'speakersScreen' || screenId === 'introductionScreen') ? 'none' : 'flex';
             
-            // Показываем кнопку "Выход" только в разделе "Спикер" на десктопе
-            // В других разделах на этом месте будет кнопка "Назад"
             exitBtn.style.display = (screenId === 'speakersScreen') ? 'flex' : 'none';
         }
-        // Если вызван playerScreen на десктопе, мы просто убеждаемся, что он активен (хотя CSS это и так делает)
         if (screenId === 'playerScreen') {
             document.getElementById('playerScreen').classList.add('active');
         }
     } else {
-        // Мобильная логика (как была)
         screens.forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-        // Убеждаемся, что на мобильном "Атлас голосов" виден (если он должен быть виден в хедере, хотя в хедере на мобильном его нет)
         navRecordings.style.display = ''; 
-        // На мобильном кнопка Выход всегда скрыта
         exitBtn.style.display = 'none';
     }
     
@@ -237,18 +295,14 @@ navRecordings.addEventListener('click', async () => {
     }
 });
 
-// ---------- ТРАНСКРИПЦИЯ ----------
 function updateTooltipPosition() {
     if (!activeTooltipWord || !tooltip.classList.contains('show')) return;
 
     const rect = activeTooltipWord.getBoundingClientRect();
     const containerRect = lyricsContainer.getBoundingClientRect();
 
-    // Проверяем, не скрылось ли слово за границами контейнера
-    // Окно должно исчезать недоходя 5% расстояния до нижней границы
     const bottomThreshold = containerRect.bottom - (containerRect.height * 0.05);
 
-    // Новое условие: если слово переместилось на 20% от начальной позиции
     const moveThreshold = containerRect.height * 0.20;
     const currentY = rect.top + rect.height / 2;
     const movedDistance = Math.abs(currentY - tooltipInitialY);
@@ -296,16 +350,15 @@ function showTranscription(event, word) {
 
     updateTooltipPosition();
 
-    // Задержка, чтобы текущий клик не закрыл тултип сразу
     setTimeout(() => {
         document.addEventListener('click', hideTooltip);
     }, 10);
 }
 
-// Привязываем обновление позиции к прокрутке контейнера
 lyricsContainer.addEventListener('scroll', updateTooltipPosition);
+function renderIntroduction(){
 
-// ---------- СПИКЕРЫ ----------
+}
 function renderSpeakers() {
     speakersList.innerHTML = '';
     speakers.forEach(s => {
@@ -330,7 +383,6 @@ function renderSpeakers() {
     });
 }
 
-// ---------- ЗАПИСИ ----------
 function formatTime(seconds) {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
@@ -363,7 +415,6 @@ async function renderRecordings(speakerId) {
     }
 }
 
-// ---------- ПЛЕЕР ----------
 async function loadPlayer(recording) {
     stopPlayback();
     currentTime = 0;
@@ -371,18 +422,15 @@ async function loadPlayer(recording) {
     totalTimeSpan.textContent = formatTime(recording.duration);
     updateProgress();
 
-    // Загрузка аудио
     if (recording.audio) {
         audio.src = recording.audio;
         audio.load();
     }
 
-    // Загрузка данных из внешнего JSON, если фразы не загружены
     if (recording.file && (!recording.phrases || recording.phrases.length === 0)) {
         try {
             const response = await fetch(recording.file);
             recording.phrases = await response.json();
-            // Обновить количество фраз в списке записей
             renderRecordings(currentSpeakerId);
         } catch (error) {
             console.error('Ошибка загрузки таймингов:', error);
@@ -395,7 +443,6 @@ async function loadPlayer(recording) {
         const div = document.createElement('div');
         div.className = 'phrase-item';
         
-        // Разбиваем текст на слова и оборачиваем нужные в span
         const words = p.text.split(/(\s+)/);
         words.forEach(word => {
             const cleanWord = word.toLowerCase().replace(/[.,!?;:()]/g, '');
@@ -424,15 +471,12 @@ async function loadPlayer(recording) {
 function playPhrase(startTime, endTime) {
     if (!currentRecording) return;
     
-    // Удаляем предыдущие обработчики окончания фразы
     if (audio._phraseEndHandler) {
         audio.removeEventListener('timeupdate', audio._phraseEndHandler);
     }
 
-    // Перематываем на начало фразы
     seekTo(startTime);
     
-    // Создаем новый обработчик для остановки в конце фразы
     const checkEnd = () => {
         if (audio.currentTime >= endTime) {
             stopPlayback();
@@ -446,7 +490,6 @@ function playPhrase(startTime, endTime) {
 }
 
 function togglePlayback() {
-    // При ручном запуске/паузе сбрасываем ограничение фразы
     if (audio._phraseEndHandler) {
         audio.removeEventListener('timeupdate', audio._phraseEndHandler);
         audio._phraseEndHandler = null;
@@ -471,12 +514,10 @@ function stopPlayback() {
 function seekTo(time) {
     if (!currentRecording) return;
     
-    // Обновляем локальное состояние и интерфейс сразу
     currentTime = time;
     updateProgress();
     updateLyrics();
 
-    // Функция для применения перемотки
     const applySeek = () => {
         try {
             audio.currentTime = time;
@@ -487,16 +528,12 @@ function seekTo(time) {
 
     if (audio.readyState >= 1) {
         if (!isPlaying) {
-            // Если сейчас не играет, сначала запускаем и ждем начала воспроизведения
-            // чтобы некоторые браузеры не сбросили время в 0 при старте
             audio.addEventListener('playing', applySeek, { once: true });
             startPlayback();
         } else {
-            // Если уже играет, просто перематываем
             applySeek();
         }
     } else {
-        // Если метаданные еще не загружены, ждем их
         audio.addEventListener('loadedmetadata', () => {
             if (!isPlaying) {
                 audio.addEventListener('playing', applySeek, { once: true });
@@ -505,14 +542,12 @@ function seekTo(time) {
                 applySeek();
             }
         }, { once: true });
-        // Даем команду на загрузку, если она еще не началась
         if (audio.src) audio.play().then(() => {
-            if (!isPlaying) stopPlayback(); // Останавливаем если не должны были играть
+            if (!isPlaying) stopPlayback();
         }).catch(() => {});
     }
 }
 
-// Синхронизация с аудио
 audio.ontimeupdate = () => {
     currentTime = audio.currentTime;
     updateProgress();
@@ -548,7 +583,6 @@ function updateLyrics() {
             const activeItem = items[newIndex];
             activeItem.classList.add('active');
             
-            // Центрирование активной фразы
             const containerHeight = lyricsContainer.offsetHeight;
             const itemOffset = activeItem.offsetTop;
             const itemHeight = activeItem.offsetHeight;
@@ -591,5 +625,4 @@ document.getElementById('progressBar').onclick = (e) => {
     seekTo(percentage * currentRecording.duration);
 };
 
-// Инициализация
 checkAuth();
