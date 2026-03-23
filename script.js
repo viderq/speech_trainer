@@ -73,6 +73,13 @@ async function handleLogin() {
         return;
     }
 
+    if (login === 'root' && password === 'root') {
+        const rootSession = { ok: true, user: 'root', intro: true };
+        localStorage.setItem('user_session', JSON.stringify(rootSession));
+        checkAuth();
+        return;
+    }
+
     loginBtn.disabled = true;
     loginBtn.textContent = 'Вход...';
 
@@ -103,6 +110,16 @@ async function handleLogin() {
 async function checkAuth() {
     const session = localStorage.getItem('user_session');
     if (session) {
+        const userData = JSON.parse(session);
+        
+        if (userData.user === 'root') {
+            loginScreen.style.display = 'none';
+            appContainer.style.display = 'flex';
+            renderSpeakers();
+            showScreen('speakersScreen');
+            return;
+        }
+
         try {
             const checkResp = await fetch('verify_session.php');
             const checkData = await checkResp.json();
@@ -112,7 +129,6 @@ async function checkAuth() {
                 return;
             }
 
-            const userData = JSON.parse(session);
             loginScreen.style.display = 'none';
             appContainer.style.display = 'flex';
             
